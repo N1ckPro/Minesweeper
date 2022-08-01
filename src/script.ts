@@ -4,10 +4,14 @@ document.addEventListener('contextmenu', event => {
 }, false);
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
-const gameWidth = canvas.width - 40;
-const gameHeight = canvas.height - 40;
+const size = 40;
+const gameWidth = canvas.width - size;
+const gameHeight = canvas.height - size;
 let gameRunning = true;
 let mapGenerated = false;
+
+const darkGreen = '#33ff33';
+const lightGreen = '#99ff99';
 
 const blocks: BlockPosition[] = [];
 
@@ -16,11 +20,11 @@ const rectangle = (x: number, y: number, width: number, length: number, color: s
     context.fillRect(x, y, width, length);
 };
 
-rectangle(0, 0, canvas.width, canvas.height, '#99ff99');
-for (let i = 0; i <= canvas.height; i += 40 * 2) {
-    for (let j = 0; j <= canvas.width; j += 40 * 2) {
-        rectangle(j, i, 40, 40, '#33ff33');
-        rectangle(j + 40, i + 40, 40, 40, '#33ff33');
+rectangle(0, 0, canvas.width, canvas.height, lightGreen);
+for (let i = 0; i <= canvas.height; i += size * 2) {
+    for (let j = 0; j <= canvas.width; j += size * 2) {
+        rectangle(j, i, size, size, darkGreen);
+        rectangle(j + size, i + size, size, size, darkGreen);
     }
 }
 
@@ -28,10 +32,10 @@ const bombPositions: Position[] = [];
 
 const randomPosition = (block: Position): Position => {
     const bomb = {
-        x: Math.round((Math.random() * gameWidth) / 40) * 40,
-        y: Math.round((Math.random() * gameHeight) / 40) * 40
+        x: Math.round((Math.random() * gameWidth) / size) * size,
+        y: Math.round((Math.random() * gameHeight) / size) * size
     };
-    const surroundingBlocksHaveBomb = bomb.x - block.x <= 40 && bomb.x - block.x >= -40 && bomb.y - block.y <= 40 && bomb.y - block.y >= -40 && (bomb.x - block.x != 0 || bomb.y - block.y != 0);
+    const surroundingBlocksHaveBomb = bomb.x - block.x <= size && bomb.x - block.x >= -size && bomb.y - block.y <= size && bomb.y - block.y >= -size && (bomb.x - block.x != 0 || bomb.y - block.y != 0);
 
     if (!surroundingBlocksHaveBomb && !bombPositions.some(pos => bomb.x == pos.x && bomb.y == pos.y) && bomb.x != block.x && bomb.y != block.y) return bomb;
     else return randomPosition(block);
@@ -41,14 +45,10 @@ const getSurroundingBombCount = (block: Position): number => {
     const blocks = getSurrondingBlocks(block);
     if (!blocks) return 0;
 
-    let i = 0;
-    blocks.forEach(block => {
-        if (block.bomb) i++;
-    });
-    return i;
+    return blocks.filter(block => block.bomb).length;
 };
 
-const getSurrondingBlocks = (centerBlock: Position): BlockPosition[] => blocks.filter(block => block.x - centerBlock.x <= 40 && block.x - centerBlock.x >= -40 && block.y - centerBlock.y <= 40 && block.y - centerBlock.y >= -40 && (block.x - centerBlock.x != 0 || block.y - centerBlock.y != 0));
+const getSurrondingBlocks = (centerBlock: Position): BlockPosition[] => blocks.filter(block => block.x - centerBlock.x <= size && block.x - centerBlock.x >= -size && block.y - centerBlock.y <= size && block.y - centerBlock.y >= -size && (block.x - centerBlock.x != 0 || block.y - centerBlock.y != 0));
 
 const getFullSurrondingBlocks = (centerBlockPosition: Position, loopBlocks: Position[]): BlockPosition[] => {
     const centerBlock = blocks.find(block => block.x == centerBlockPosition.x && block.y == centerBlockPosition.y);
@@ -93,7 +93,7 @@ const updateMap = (blockPosition: Position): void => {
 
     surrondingBlocks.forEach(block => {
         block.exposed = true;
-        rectangle(block.x, block.y, 40, 40, '#0000ff');
+        rectangle(block.x, block.y, size, size, '#0000ff');
 
         if (block.surroundingBombs == 0) return;
         context.fillStyle = 'yellow';
@@ -107,11 +107,12 @@ const generateMap = (blockPosition: Position): void => {
         bombPositions.push(randomPosition(blockPosition));
     }
 
-    let color = '#99ff99';
-    for (let i = 0; i <= gameWidth; i += 40) {
-        for (let j = 0; j <= gameHeight; j += 40) {
+    let color = lightGreen;
+    for (let i = 0; i <= gameWidth; i += size) {
+        if (gameWidth % (size * 2) != 0 && i != 0) color = color == darkGreen ? lightGreen : darkGreen;
+        for (let j = 0; j <= gameHeight; j += size) {
             const bomb = bombPositions.some(pos => pos.x == i && pos.y == j);
-            color = color == '#33ff33' ? '#99ff99' : '#33ff33';
+            color = color == darkGreen ? lightGreen : darkGreen;
             blocks.push({ bomb, color, exposed: false, flag: false, surroundingBombs: 0, x: i, y: j });
         }
     }
@@ -126,8 +127,8 @@ const generateMap = (blockPosition: Position): void => {
 const handleLeftClick = (event: MouseEvent): void => {
     const rect = canvas.getBoundingClientRect();
     const blockPosition: Position = {
-        x: Math.floor((event.pageX - rect.left) / 40) * 40,
-        y: Math.floor((event.pageY - rect.top) / 40) * 40
+        x: Math.floor((event.pageX - rect.left) / size) * size,
+        y: Math.floor((event.pageY - rect.top) / size) * size
     };
 
     if (!mapGenerated) generateMap(blockPosition);
@@ -143,8 +144,8 @@ const handleLeftClick = (event: MouseEvent): void => {
 const handleRightClick = (event: MouseEvent): void => {
     const rect = canvas.getBoundingClientRect();
     const blockPosition: Position = {
-        x: Math.floor((event.pageX - rect.left) / 40) * 40,
-        y: Math.floor((event.pageY - rect.top) / 40) * 40
+        x: Math.floor((event.pageX - rect.left) / size) * size,
+        y: Math.floor((event.pageY - rect.top) / size) * size
     };
 
     if (!mapGenerated) generateMap(blockPosition);
@@ -154,11 +155,11 @@ const handleRightClick = (event: MouseEvent): void => {
 
     if (block.exposed) return;
     if (!block.flag) {
-        rectangle(block.x, block.y, 40, 40, 'red');
+        rectangle(block.x, block.y, size, size, 'red');
         block.flag = true;
         checkGameWin();
     } else {
-        rectangle(block.x, block.y, 40, 40, block.color);
+        rectangle(block.x, block.y, size, size, block.color);
         block.flag = false;
     }
 };
