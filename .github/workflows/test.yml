@@ -1,0 +1,26 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node v16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.16.0
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Run Lint
+        run: yarn lint
+
+      - name: Compile TypeScript
+        run: yarn build
