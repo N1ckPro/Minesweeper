@@ -79,7 +79,7 @@ const checkGameLoss = (block: BlockPosition): void => {
 };
 
 const checkGameWin = (): void => {
-    if (blocks.filter(block => block.bomb).every(block => block.flag)) {
+    if (blocks.filter(block => !block.bomb).every(block => block.exposed)) {
         gameRunning = false;
         context.fillStyle = 'green';
         context.font = '50px Arial';
