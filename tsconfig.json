@@ -1,0 +1,13 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "lib": ["dom"],
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "outDir": "build/src",
+        "sourceMap": true,
+        "target": "ES5"
+    },
+    "exclude": ["node_modules"]
+}
