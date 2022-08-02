@@ -1,7 +1,4 @@
-document.addEventListener('contextmenu', event => {
-    event.preventDefault();
-    if (gameRunning) handleRightClick(event);
-}, false);
+
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
 const size = 40;
@@ -9,6 +6,11 @@ const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
 let gameRunning = true;
 let mapGenerated = false;
+
+canvas.addEventListener('contextmenu', event => {
+    event.preventDefault();
+    if (gameRunning) handleRightClick(event);
+}, false);
 
 const darkGreen = '#33ff33';
 const lightGreen = '#99ff99';
