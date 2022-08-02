@@ -143,8 +143,8 @@ const handleLeftClick = (event: MouseEvent): void => {
     if (block.exposed || block.flag) return;
 
     checkGameLoss(block);
-    checkGameWin();
     updateMap(blockPosition);
+    checkGameWin();
 };
 
 const handleRightClick = (event: MouseEvent): void => {
