@@ -1,21 +1,26 @@
-
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
+
 const size = 40;
 const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
+
 let gameRunning = true;
 let mapGenerated = false;
+const blocks: BlockPosition[] = [];
+const bombPositions: Position[] = [];
+const darkGreen = '#33ff33';
+const lightGreen = '#99ff99';
+
+canvas.addEventListener('click', event => {
+    if (!gameRunning) return;
+    if (event.button == 0) return handleLeftClick(event);
+});
 
 canvas.addEventListener('contextmenu', event => {
     event.preventDefault();
     if (gameRunning) handleRightClick(event);
 }, false);
-
-const darkGreen = '#33ff33';
-const lightGreen = '#99ff99';
-
-const blocks: BlockPosition[] = [];
 
 const rectangle = (x: number, y: number, width: number, length: number, color: string): void => {
     context.fillStyle = color;
@@ -30,24 +35,22 @@ for (let i = 0; i <= canvas.height; i += size * 2) {
     }
 }
 
-const bombPositions: Position[] = [];
-
-const randomPosition = (block: Position): Position => {
-    const bomb = {
-        x: Math.round((Math.random() * gameWidth) / size) * size,
-        y: Math.round((Math.random() * gameHeight) / size) * size
-    };
-    const surroundingBlocksHaveBomb = bomb.x - block.x <= size && bomb.x - block.x >= -size && bomb.y - block.y <= size && bomb.y - block.y >= -size && (bomb.x - block.x != 0 || bomb.y - block.y != 0);
-
-    if (!surroundingBlocksHaveBomb && !bombPositions.some(pos => bomb.x == pos.x && bomb.y == pos.y) && bomb.x != block.x && bomb.y != block.y) return bomb;
-    else return randomPosition(block);
+const checkGameLoss = (block: BlockPosition): void => {
+    if (block.bomb && !block.flag) {
+        gameRunning = false;
+        context.fillStyle = 'red';
+        context.font = '50px Arial';
+        context.fillText('GAME OVER', 50, 200);
+    }
 };
 
-const getSurroundingBombCount = (block: Position): number => {
-    const blocks = getSurrondingBlocks(block);
-    if (!blocks) return 0;
-
-    return blocks.filter(block => block.bomb).length;
+const checkGameWin = (): void => {
+    if (blocks.filter(block => !block.bomb).every(block => block.exposed)) {
+        gameRunning = false;
+        context.fillStyle = 'green';
+        context.font = '50px Arial';
+        context.fillText('YOU WON', 50, 200);
+    }
 };
 
 const getSurrondingBlocks = (centerBlock: Position): BlockPosition[] => blocks.filter(block => block.x - centerBlock.x <= size && block.x - centerBlock.x >= -size && block.y - centerBlock.y <= size && block.y - centerBlock.y >= -size && (block.x - centerBlock.x != 0 || block.y - centerBlock.y != 0));
@@ -71,37 +74,11 @@ const getFullSurrondingBlocks = (centerBlockPosition: Position, loopBlocks: Posi
     return surrondingBlocks;
 };
 
-const checkGameLoss = (block: BlockPosition): void => {
-    if (block.bomb && !block.flag) {
-        gameRunning = false;
-        context.fillStyle = 'red';
-        context.font = '50px Arial';
-        context.fillText('GAME OVER', 50, 200);
-    }
-};
+const getSurroundingBombCount = (block: Position): number => {
+    const blocks = getSurrondingBlocks(block);
+    if (!blocks) return 0;
 
-const checkGameWin = (): void => {
-    if (blocks.filter(block => !block.bomb).every(block => block.exposed)) {
-        gameRunning = false;
-        context.fillStyle = 'green';
-        context.font = '50px Arial';
-        context.fillText('YOU WON', 50, 200);
-    }
-};
-
-const updateMap = (blockPosition: Position): void => {
-    const surrondingBlocks = getFullSurrondingBlocks(blockPosition, []);
-    if (surrondingBlocks.length != 1) surrondingBlocks.push(blocks.find(block => block.x == blockPosition.x && block.y == blockPosition.y));
-
-    surrondingBlocks.forEach(block => {
-        block.exposed = true;
-        rectangle(block.x, block.y, size, size, '#0000ff');
-
-        if (block.surroundingBombs == 0) return;
-        context.fillStyle = 'yellow';
-        context.font = '20px Arial';
-        context.fillText(block.surroundingBombs.toString(), block.x + 15, block.y + 25);
-    });
+    return blocks.filter(block => block.bomb).length;
 };
 
 const generateMap = (blockPosition: Position): void => {
@@ -124,6 +101,33 @@ const generateMap = (blockPosition: Position): void => {
     });
 
     mapGenerated = true;
+};
+
+
+const randomPosition = (block: Position): Position => {
+    const bomb = {
+        x: Math.round((Math.random() * gameWidth) / size) * size,
+        y: Math.round((Math.random() * gameHeight) / size) * size
+    };
+    const surroundingBlocksHaveBomb = bomb.x - block.x <= size && bomb.x - block.x >= -size && bomb.y - block.y <= size && bomb.y - block.y >= -size && (bomb.x - block.x != 0 || bomb.y - block.y != 0);
+
+    if (!surroundingBlocksHaveBomb && !bombPositions.some(pos => bomb.x == pos.x && bomb.y == pos.y) && bomb.x != block.x && bomb.y != block.y) return bomb;
+    else return randomPosition(block);
+};
+
+const updateMap = (blockPosition: Position): void => {
+    const surrondingBlocks = getFullSurrondingBlocks(blockPosition, []);
+    if (surrondingBlocks.length != 1) surrondingBlocks.push(blocks.find(block => block.x == blockPosition.x && block.y == blockPosition.y));
+
+    surrondingBlocks.forEach(block => {
+        block.exposed = true;
+        rectangle(block.x, block.y, size, size, '#0000ff');
+
+        if (block.surroundingBombs == 0) return;
+        context.fillStyle = 'yellow';
+        context.font = '20px Arial';
+        context.fillText(block.surroundingBombs.toString(), block.x + 15, block.y + 25);
+    });
 };
 
 const handleLeftClick = (event: MouseEvent): void => {
@@ -165,8 +169,3 @@ const handleRightClick = (event: MouseEvent): void => {
         block.flag = false;
     }
 };
-
-canvas.addEventListener('click', event => {
-    if (!gameRunning) return;
-    if (event.button == 0) return handleLeftClick(event);
-});
