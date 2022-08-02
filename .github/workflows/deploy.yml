@@ -1,0 +1,74 @@
+name: Deploy
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types: [completed]
+    branches: [stable]
+
+jobs:
+  build:
+    name: Compile TypeScript
+    runs-on: ubuntu-latest
+    if: |
+      ${{ github.event.workflow_run.conclusion == 'success' }} ||
+      github.repository_owner == 'N1ckPro'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node v16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Compile TypeScript
+        run: yarn build
+        
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: files
+          path: build/src/*
+
+  deploy:
+    name: Deploy Minesweeper Game
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      VERSION: node -p "require('./package.json').version"
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: files
+          path: files
+        
+      - name: Pack files to ZIP
+        run: |
+          zip files.zip files/*
+      
+      - name: Get game version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+      
+      - name: Install Butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+      
+      - name: Login to Butler
+        run: |
+          ./butler login
+
+      - name: Deploy
+        run: |
+          ./butler push files.zip n1ck-pro/minesweeper:main --userversion $steps.package-version.outputs.current-version
