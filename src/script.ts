@@ -9,8 +9,15 @@ let gameRunning = true;
 let mapGenerated = false;
 const blocks: BlockPosition[] = [];
 const bombPositions: Position[] = [];
+const darkBlue = '#0000ff';
 const darkGreen = '#33ff33';
+const lightBlue = '#3333ff';
 const lightGreen = '#99ff99';
+
+enum ColorType {
+    Dark,
+    Light
+}
 
 canvas.addEventListener('click', event => {
     if (!gameRunning) return;
@@ -86,12 +93,12 @@ const generateMap = (blockPosition: Position): void => {
         bombPositions.push(randomPosition(blockPosition));
     }
 
-    let color = lightGreen;
+    let color = ColorType.Light as ColorType.Dark | ColorType.Light;
     for (let i = 0; i <= gameWidth; i += size) {
-        if (gameWidth % (size * 2) != 0 && i != 0) color = color == darkGreen ? lightGreen : darkGreen;
+        if (gameWidth % (size * 2) != 0 && i != 0) color = color == ColorType.Dark ? ColorType.Light : ColorType.Dark;
         for (let j = 0; j <= gameHeight; j += size) {
             const bomb = bombPositions.some(pos => pos.x == i && pos.y == j);
-            color = color == darkGreen ? lightGreen : darkGreen;
+            color = color == ColorType.Dark ? ColorType.Light : ColorType.Dark;
             blocks.push({ bomb, color, exposed: false, flag: false, surroundingBombs: 0, x: i, y: j });
         }
     }
@@ -121,7 +128,7 @@ const updateMap = (blockPosition: Position): void => {
 
     surrondingBlocks.forEach(block => {
         block.exposed = true;
-        rectangle(block.x, block.y, size, size, '#0000ff');
+        rectangle(block.x, block.y, size, size, getBlockColor(block));
 
         if (block.surroundingBombs == 0) return;
         context.fillStyle = 'yellow';
@@ -147,6 +154,14 @@ const handleLeftClick = (event: MouseEvent): void => {
     checkGameWin();
 };
 
+const getBlockColor = (block: BlockPosition): string => {
+    if (block.exposed) {
+        return block.color == ColorType.Dark ? darkBlue : lightBlue;
+    }
+
+    return block.color == ColorType.Dark ? darkGreen : lightGreen;
+};
+
 const handleRightClick = (event: MouseEvent): void => {
     const rect = canvas.getBoundingClientRect();
     const blockPosition: Position = {
@@ -165,7 +180,7 @@ const handleRightClick = (event: MouseEvent): void => {
         block.flag = true;
         checkGameWin();
     } else {
-        rectangle(block.x, block.y, size, size, block.color);
+        rectangle(block.x, block.y, size, size, getBlockColor(block));
         block.flag = false;
     }
 };

@@ -5,7 +5,7 @@ interface Position {
 
 interface BlockPosition extends Position {
     bomb: boolean;
-    color: string;
+    color: ColorType;
     exposed: boolean;
     flag: boolean;
     surroundingBombs: number;
