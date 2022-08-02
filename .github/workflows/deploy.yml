@@ -72,5 +72,7 @@ jobs:
           ./butler login
 
       - name: Deploy
+        env:
+          VERSION: ${{ steps.package-version.outputs.current-version} }}
         run: |
-          ./butler push files.zip n1ck-pro/minesweeper:main --userversion "${steps.package-version.outputs.current-version}"
+          ./butler push files.zip n1ck-pro/minesweeper:main --userversion ${VERSION}
