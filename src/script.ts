@@ -179,7 +179,7 @@ const handleRightClick = (event: MouseEvent): void => {
 
     if (block.exposed) return;
     if (!block.flag) {
-        context.drawImage(flag, block.x, block.y, 40, 40);
+        context.drawImage(flag, block.x, block.y, size, size);
         block.flag = true;
         checkGameWin();
     } else {
