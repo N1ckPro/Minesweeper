@@ -6,7 +6,7 @@ const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
 
 const flag = new Image();
-flag.src = 'flag.png';
+flag.src = 'images/flag.png';
 
 let gameRunning = true;
 let mapGenerated = false;
