@@ -55,7 +55,7 @@ jobs:
         
       - name: Pack files to ZIP
         run: |
-          zip files.zip files/*
+          zip -r files.zip files
       
       - name: Get game version
         id: package-version
