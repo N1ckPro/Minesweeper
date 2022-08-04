@@ -5,6 +5,9 @@ const size = 40;
 const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
 
+const flag = new Image();
+flag.src = 'flag.png';
+
 let gameRunning = true;
 let mapGenerated = false;
 const blocks: BlockPosition[] = [];
@@ -176,7 +179,7 @@ const handleRightClick = (event: MouseEvent): void => {
 
     if (block.exposed) return;
     if (!block.flag) {
-        rectangle(block.x, block.y, size, size, 'red');
+        context.drawImage(flag, block.x, block.y, 40, 40);
         block.flag = true;
         checkGameWin();
     } else {

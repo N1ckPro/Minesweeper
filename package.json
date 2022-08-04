@@ -16,7 +16,7 @@
     "typescript": "^4.7.4"
   },
   "scripts": {
-    "build": "cpy ../src/index.html index.html --cwd=build && tsc --build",
+    "build": "cpy ./src/images/*.png ./src/*.html build && tsc --build",
     "lint": "eslint src"
   }
 }
