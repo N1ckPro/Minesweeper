@@ -1,6 +1,6 @@
 {
   "name": "minesweeper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "packageManager": "yarn@3.2.2",
   "author": {
     "name": "n1ck_pro",
