@@ -1,26 +1,47 @@
+enum ColorType {
+    Dark,
+    Light
+}
+
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
 
 const size = 40;
 const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
-
-const flag = new Image();
-flag.src = 'images/flag.png';
-
-let gameRunning = true;
-let mapGenerated = false;
-const blocks: BlockPosition[] = [];
-const bombPositions: Position[] = [];
 const darkBlue = '#0000ff';
 const darkGreen = '#33ff33';
 const lightBlue = '#3333ff';
 const lightGreen = '#99ff99';
 
-enum ColorType {
-    Dark,
-    Light
-}
+const flag = new Image();
+flag.src = 'images/flag.png';
+
+const rectangle = (x: number, y: number, width: number, length: number, color: string): void => {
+    context.fillStyle = color;
+    context.fillRect(x, y, width, length);
+};
+
+const startGame = (): void => {
+    blocks = [];
+    bombPositions = [];
+    gameRunning = true;
+    mapGenerated = false;
+
+    rectangle(0, 0, canvas.width, canvas.height, lightGreen);
+    for (let i = 0; i <= canvas.height; i += size * 2) {
+        for (let j = 0; j <= canvas.width; j += size * 2) {
+            rectangle(j, i, size, size, darkGreen);
+            rectangle(j + size, i + size, size, size, darkGreen);
+        }
+    }
+};
+
+let gameRunning: boolean;
+let mapGenerated: boolean;
+let blocks: BlockPosition[];
+let bombPositions: Position[];
+startGame();
 
 canvas.addEventListener('click', event => {
     if (!gameRunning) return;
@@ -32,18 +53,9 @@ canvas.addEventListener('contextmenu', event => {
     if (gameRunning) handleRightClick(event);
 }, false);
 
-const rectangle = (x: number, y: number, width: number, length: number, color: string): void => {
-    context.fillStyle = color;
-    context.fillRect(x, y, width, length);
-};
-
-rectangle(0, 0, canvas.width, canvas.height, lightGreen);
-for (let i = 0; i <= canvas.height; i += size * 2) {
-    for (let j = 0; j <= canvas.width; j += size * 2) {
-        rectangle(j, i, size, size, darkGreen);
-        rectangle(j + size, i + size, size, size, darkGreen);
-    }
-}
+window.addEventListener('keydown', event => {
+    if (event.key == 'r') startGame();
+});
 
 const checkGameLoss = (block: BlockPosition): void => {
     if (block.bomb && !block.flag) {
