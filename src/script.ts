@@ -54,7 +54,7 @@ canvas.addEventListener('contextmenu', event => {
 }, false);
 
 window.addEventListener('keydown', event => {
-    if (event.key == 'r') startGame();
+    if (event.key.toLowerCase() == 'r') startGame();
 });
 
 const checkGameLoss = (block: BlockPosition): void => {
