@@ -6,9 +6,13 @@ enum ColorType {
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
 
+canvas.width = 440;
+canvas.height = 440;
+
 const size = 40;
 const gameWidth = canvas.width - size;
 const gameHeight = canvas.height - size;
+const bombCount = (canvas.width / size) * (canvas.height / size) * 0.2;
 const darkBlue = '#0000ff';
 const darkGreen = '#33ff33';
 const lightBlue = '#3333ff';
@@ -104,7 +108,7 @@ const getSurroundingBombCount = (block: Position): number => {
 };
 
 const generateMap = (blockPosition: Position): void => {
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < bombCount; i++) {
         bombPositions.push(randomPosition(blockPosition));
     }
 
