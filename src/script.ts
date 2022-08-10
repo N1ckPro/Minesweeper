@@ -62,7 +62,7 @@ window.addEventListener('keydown', event => {
 });
 
 const checkGameLoss = (block: BlockPosition): void => {
-    if (block.bomb && !block.flag) {
+    if (block.bomb) {
         gameRunning = false;
         context.fillStyle = 'red';
         context.font = '50px Arial';
@@ -169,6 +169,8 @@ const handleLeftClick = (event: MouseEvent): void => {
     if (block.exposed || block.flag) return;
 
     checkGameLoss(block);
+    if (!gameRunning) return;
+
     updateMap(blockPosition);
     checkGameWin();
 };
