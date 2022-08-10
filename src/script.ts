@@ -6,8 +6,8 @@ enum ColorType {
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d');
 
-canvas.width = 440;
-canvas.height = 440;
+canvas.width = 600;
+canvas.height = 600;
 
 const size = 40;
 const gameWidth = canvas.width - size;
@@ -61,9 +61,37 @@ window.addEventListener('keydown', event => {
     if (event.key.toLowerCase() == 'r') startGame();
 });
 
-const checkGameLoss = (block: BlockPosition): void => {
+const getRandomIndex = (length: number, indexes: number[]): void => {
+    const index = Math.round(Math.random() * length);
+    if (!indexes.some(ind => ind == index)) indexes.push(index);
+    else getRandomIndex(length, indexes);
+};
+
+const checkGameLoss = async (block: BlockPosition): Promise<void> => {
     if (block.bomb) {
         gameRunning = false;
+
+        const loopBlocks = blocks.filter(block => block.bomb || block.flag);
+        const indexes: number[] = [];
+        loopBlocks.forEach(() => {
+            getRandomIndex(loopBlocks.length - 1, indexes);
+        });
+
+        for await (const index of indexes) {
+            const block = loopBlocks[index];
+
+            if (block.flag && block.bomb) return;
+            if (block.flag && !block.bomb) rectangle(block.x, block.y, size, size, getBlockColor(block));
+            else {
+                context.fillStyle = 'black';
+                context.beginPath();
+                context.arc(block.x + 20, block.y + 20, size / 4, 0, 2 * Math.PI);
+                context.fill();
+                context.stroke();
+            }
+            await new Promise(resolve => window.setTimeout(resolve, 200));
+        }
+
         context.fillStyle = 'red';
         context.font = '50px Arial';
         context.fillText('GAME OVER', 50, 200);
