@@ -80,7 +80,7 @@ const checkGameLoss = async (block: BlockPosition): Promise<void> => {
         for await (const index of indexes) {
             const block = loopBlocks[index];
 
-            if (block.flag && block.bomb) return;
+            if (block.flag && block.bomb) continue;
             if (block.flag && !block.bomb) rectangle(block.x, block.y, size, size, getBlockColor(block));
             else {
                 context.fillStyle = 'black';
