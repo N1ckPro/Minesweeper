@@ -31,6 +31,7 @@ const startGame = (): void => {
     bombPositions = [];
     gameRunning = true;
     mapGenerated = false;
+    gameId++;
 
     rectangle(0, 0, canvas.width, canvas.height, lightGreen);
     for (let i = 0; i <= canvas.height; i += size * 2) {
@@ -41,6 +42,7 @@ const startGame = (): void => {
     }
 };
 
+let gameId = 0;
 let gameRunning: boolean;
 let mapGenerated: boolean;
 let blocks: BlockPosition[];
@@ -69,6 +71,7 @@ const getRandomIndex = (length: number, indexes: number[]): void => {
 
 const checkGameLoss = async (block: BlockPosition): Promise<void> => {
     if (block.bomb) {
+        const gameIdTemp = gameId;
         gameRunning = false;
 
         const loopBlocks = blocks.filter(block => block.bomb || block.flag);
@@ -78,6 +81,7 @@ const checkGameLoss = async (block: BlockPosition): Promise<void> => {
         });
 
         for await (const index of indexes) {
+            if (gameId != gameIdTemp) return;
             const block = loopBlocks[index];
 
             if (block.flag && block.bomb) continue;
@@ -91,6 +95,7 @@ const checkGameLoss = async (block: BlockPosition): Promise<void> => {
             }
             await new Promise(resolve => window.setTimeout(resolve, 200));
         }
+        if (gameId != gameIdTemp) return;
 
         context.fillStyle = 'red';
         context.font = '50px Arial';
