@@ -31,31 +31,6 @@ const rectangle = (x: number, y: number, width: number, length: number, color: s
     context.fillRect(x, y, width, length);
 };
 
-const startGame = (): void => {
-    blocks = [];
-    bombPositions = [];
-    gameRunning = true;
-    mapGenerated = false;
-    gameId++;
-    currentFlagCount = bombCount;
-
-    rectangle(0, 0, gameCanvas.width, gameCanvas.height, lightGreen);
-    for (let i = 0; i <= gameCanvas.height; i += size * 2) {
-        for (let j = 0; j <= gameCanvas.width; j += size * 2) {
-            rectangle(j, i, size, size, darkGreen);
-            rectangle(j + size, i + size, size, size, darkGreen);
-        }
-    }
-};
-
-let gameId = 0;
-let gameRunning: boolean;
-let mapGenerated: boolean;
-let blocks: BlockPosition[];
-let bombPositions: Position[];
-let currentFlagCount: number;
-startGame();
-
 gameCanvas.addEventListener('click', event => {
     if (!gameRunning) return;
     if (event.button == 0) return handleLeftClick(event);
@@ -166,6 +141,8 @@ const generateMap = (blockPosition: Position): void => {
         block.surroundingBombs = block.bomb ? 0 : getSurroundingBombCount({ x: block.x, y: block.y });
     });
 
+    updateFlagCounter();
+
     mapGenerated = true;
 };
 
@@ -178,6 +155,14 @@ const randomPosition = (block: Position): Position => {
 
     if (!surroundingBlocksHaveBomb && !bombPositions.some(pos => bomb.x == pos.x && bomb.y == pos.y) && bomb.x != block.x && bomb.y != block.y) return bomb;
     else return randomPosition(block);
+};
+
+const updateFlagCounter = (): void => {
+    rectangle(0, 0, flagCanvas.width, flagCanvas.height, '#202020', flagContext);
+    flagContext.drawImage(flag, flagCanvas.width / 2 - 40, 0, 40, 40);
+    flagContext.fillStyle = 'red';
+    flagContext.font = '40px Arial';
+    flagContext.fillText(currentFlagCount.toString(), flagCanvas.width / 2, 40 / 1.15);
 };
 
 const updateMap = (blockPosition: Position): void => {
@@ -245,10 +230,31 @@ const handleRightClick = (event: MouseEvent): void => {
         block.flag = false;
         currentFlagCount++;
     }
-
-    rectangle(0, 0, flagCanvas.width, flagCanvas.height, '#202020', flagContext);
-    flagContext.drawImage(flag, flagCanvas.width / 2 - 40, 0, 40, 40);
-    flagContext.fillStyle = 'red';
-    flagContext.font = '40px Arial';
-    flagContext.fillText(currentFlagCount.toString(), flagCanvas.width / 2, 40 / 1.15);
+    updateFlagCounter();
 };
+
+const startGame = (): void => {
+    blocks = [];
+    bombPositions = [];
+    gameRunning = true;
+    mapGenerated = false;
+    gameId++;
+    currentFlagCount = bombCount;
+
+    rectangle(0, 0, gameCanvas.width, gameCanvas.height, lightGreen);
+    for (let i = 0; i <= gameCanvas.height; i += size * 2) {
+        for (let j = 0; j <= gameCanvas.width; j += size * 2) {
+            rectangle(j, i, size, size, darkGreen);
+            rectangle(j + size, i + size, size, size, darkGreen);
+        }
+    }
+    rectangle(0, 0, flagCanvas.width, flagCanvas.height, '#202020', flagContext);
+};
+
+let gameId = 0;
+let gameRunning: boolean;
+let mapGenerated: boolean;
+let blocks: BlockPosition[];
+let bombPositions: Position[];
+let currentFlagCount: number;
+startGame();
