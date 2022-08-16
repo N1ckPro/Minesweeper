@@ -3,17 +3,21 @@ enum ColorType {
     Light
 }
 
-const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-const context = canvas.getContext('2d');
+const gameCanvas = document.getElementById('canvas') as HTMLCanvasElement;
+const gameContext = gameCanvas.getContext('2d');
+const flagCanvas = document.getElementById('flag_count') as HTMLCanvasElement;
+const flagContext = flagCanvas.getContext('2d');
 
-canvas.width = 600;
-canvas.height = 600;
+gameCanvas.width = 600;
+gameCanvas.height = 600;
+flagCanvas.width = 600;
+flagCanvas.height = 100;
 
 const size = 40;
-const gameWidth = canvas.width - size;
-const gameHeight = canvas.height - size;
+const gameWidth = gameCanvas.width - size;
+const gameHeight = gameCanvas.height - size;
 const bombPercentage = 20;
-const bombCount = Math.round((canvas.width / size) * (canvas.height / size) * (bombPercentage / 100));
+const bombCount = Math.round((gameCanvas.width / size) * (gameCanvas.height / size) * (bombPercentage / 100));
 const darkBlue = '#0000ff';
 const darkGreen = '#33ff33';
 const lightBlue = '#3333ff';
@@ -22,40 +26,17 @@ const lightGreen = '#99ff99';
 const flag = new Image();
 flag.src = 'images/flag.png';
 
-const rectangle = (x: number, y: number, width: number, length: number, color: string): void => {
+const rectangle = (x: number, y: number, width: number, length: number, color: string, context = gameContext): void => {
     context.fillStyle = color;
     context.fillRect(x, y, width, length);
 };
 
-const startGame = (): void => {
-    blocks = [];
-    bombPositions = [];
-    gameRunning = true;
-    mapGenerated = false;
-    gameId++;
-
-    rectangle(0, 0, canvas.width, canvas.height, lightGreen);
-    for (let i = 0; i <= canvas.height; i += size * 2) {
-        for (let j = 0; j <= canvas.width; j += size * 2) {
-            rectangle(j, i, size, size, darkGreen);
-            rectangle(j + size, i + size, size, size, darkGreen);
-        }
-    }
-};
-
-let gameId = 0;
-let gameRunning: boolean;
-let mapGenerated: boolean;
-let blocks: BlockPosition[];
-let bombPositions: Position[];
-startGame();
-
-canvas.addEventListener('click', event => {
+gameCanvas.addEventListener('click', event => {
     if (!gameRunning) return;
     if (event.button == 0) return handleLeftClick(event);
 });
 
-canvas.addEventListener('contextmenu', event => {
+gameCanvas.addEventListener('contextmenu', event => {
     event.preventDefault();
     if (gameRunning) handleRightClick(event);
 }, false);
@@ -88,28 +69,28 @@ const checkGameLoss = async (block: BlockPosition): Promise<void> => {
             if (block.flag && block.bomb) continue;
             if (block.flag && !block.bomb) rectangle(block.x, block.y, size, size, getBlockColor(block));
             else {
-                context.fillStyle = 'black';
-                context.beginPath();
-                context.arc(block.x + 20, block.y + 20, size / 4, 0, 2 * Math.PI);
-                context.fill();
-                context.stroke();
+                gameContext.fillStyle = 'black';
+                gameContext.beginPath();
+                gameContext.arc(block.x + size / 2, block.y + size / 2, size / 4, 0, 2 * Math.PI);
+                gameContext.fill();
+                gameContext.stroke();
             }
             await new Promise(resolve => window.setTimeout(resolve, 200));
         }
         if (gameId != gameIdTemp) return;
 
-        context.fillStyle = 'red';
-        context.font = '50px Arial';
-        context.fillText('GAME OVER', 50, 200);
+        gameContext.fillStyle = 'red';
+        gameContext.font = '50px Arial';
+        gameContext.fillText('GAME OVER', 50, 200);
     }
 };
 
 const checkGameWin = (): void => {
     if (blocks.filter(block => !block.bomb).every(block => block.exposed)) {
         gameRunning = false;
-        context.fillStyle = 'green';
-        context.font = '50px Arial';
-        context.fillText('YOU WON', 50, 200);
+        gameContext.fillStyle = 'green';
+        gameContext.font = '50px Arial';
+        gameContext.fillText('YOU WON', 50, 200);
     }
 };
 
@@ -160,9 +141,10 @@ const generateMap = (blockPosition: Position): void => {
         block.surroundingBombs = block.bomb ? 0 : getSurroundingBombCount({ x: block.x, y: block.y });
     });
 
+    updateFlagCounter();
+
     mapGenerated = true;
 };
-
 
 const randomPosition = (block: Position): Position => {
     const bomb = {
@@ -175,6 +157,14 @@ const randomPosition = (block: Position): Position => {
     else return randomPosition(block);
 };
 
+const updateFlagCounter = (): void => {
+    rectangle(0, 0, flagCanvas.width, flagCanvas.height, '#202020', flagContext);
+    flagContext.drawImage(flag, flagCanvas.width / 2 - 40, 0, 40, 40);
+    flagContext.fillStyle = 'red';
+    flagContext.font = '40px Arial';
+    flagContext.fillText(currentFlagCount.toString(), flagCanvas.width / 2, 40 / 1.15);
+};
+
 const updateMap = (blockPosition: Position): void => {
     const surrondingBlocks = getFullSurrondingBlocks(blockPosition, []);
     if (surrondingBlocks.length != 1) surrondingBlocks.push(blocks.find(block => block.x == blockPosition.x && block.y == blockPosition.y));
@@ -184,14 +174,14 @@ const updateMap = (blockPosition: Position): void => {
         rectangle(block.x, block.y, size, size, getBlockColor(block));
 
         if (block.surroundingBombs == 0) return;
-        context.fillStyle = 'yellow';
-        context.font = '20px Arial';
-        context.fillText(block.surroundingBombs.toString(), block.x + 15, block.y + 25);
+        gameContext.fillStyle = 'yellow';
+        gameContext.font = `${size / 2}px Arial`;
+        gameContext.fillText(block.surroundingBombs.toString(), block.x + size / 2.75, block.y + size / 1.5);
     });
 };
 
 const handleLeftClick = (event: MouseEvent): void => {
-    const rect = canvas.getBoundingClientRect();
+    const rect = gameCanvas.getBoundingClientRect();
     const blockPosition: Position = {
         x: Math.floor((event.pageX - rect.left) / size) * size,
         y: Math.floor((event.pageY - rect.top) / size) * size
@@ -218,7 +208,7 @@ const getBlockColor = (block: BlockPosition): string => {
 };
 
 const handleRightClick = (event: MouseEvent): void => {
-    const rect = canvas.getBoundingClientRect();
+    const rect = gameCanvas.getBoundingClientRect();
     const blockPosition: Position = {
         x: Math.floor((event.pageX - rect.left) / size) * size,
         y: Math.floor((event.pageY - rect.top) / size) * size
@@ -231,11 +221,40 @@ const handleRightClick = (event: MouseEvent): void => {
 
     if (block.exposed) return;
     if (!block.flag) {
-        context.drawImage(flag, block.x, block.y, size, size);
+        gameContext.drawImage(flag, block.x, block.y, size, size);
         block.flag = true;
+        currentFlagCount--;
         checkGameWin();
     } else {
         rectangle(block.x, block.y, size, size, getBlockColor(block));
         block.flag = false;
+        currentFlagCount++;
     }
+    updateFlagCounter();
 };
+
+const startGame = (): void => {
+    blocks = [];
+    bombPositions = [];
+    gameRunning = true;
+    mapGenerated = false;
+    gameId++;
+    currentFlagCount = bombCount;
+
+    rectangle(0, 0, gameCanvas.width, gameCanvas.height, lightGreen);
+    for (let i = 0; i <= gameCanvas.height; i += size * 2) {
+        for (let j = 0; j <= gameCanvas.width; j += size * 2) {
+            rectangle(j, i, size, size, darkGreen);
+            rectangle(j + size, i + size, size, size, darkGreen);
+        }
+    }
+    rectangle(0, 0, flagCanvas.width, flagCanvas.height, '#202020', flagContext);
+};
+
+let gameId = 0;
+let gameRunning: boolean;
+let mapGenerated: boolean;
+let blocks: BlockPosition[];
+let bombPositions: Position[];
+let currentFlagCount: number;
+startGame();
