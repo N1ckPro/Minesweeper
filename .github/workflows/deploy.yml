@@ -55,8 +55,8 @@ jobs:
 
       - name: Publish Github Pages
         run: |
-        git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/USER_OR_ORG/REPO.git
-        npx gh-pages -d files -u "github-actions-bot <support+actions@github.com>"
+          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/USER_OR_ORG/REPO.git
+          npx gh-pages -d files -u "github-actions-bot <support+actions@github.com>"
 
   deploy_itch:
     name: Deploy Minesweeper Game to Itch.io
