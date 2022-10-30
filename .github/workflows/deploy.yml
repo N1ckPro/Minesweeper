@@ -3,24 +3,24 @@ on:
   workflow_run:
     workflows: ["Test"]
     types: [completed]
-    branches: [stable]
+    branches:
+      - 'stable'
 
 jobs:
   build:
     name: Compile TypeScript
     runs-on: ubuntu-latest
     if: |
-      ${{ github.event.workflow_run.conclusion == 'success' }} ||
-      github.repository_owner == 'N1ckPro'
+      ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Node v16
+      - name: Install Node v18
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: yarn
           cache-dependency-path: yarn.lock
 
