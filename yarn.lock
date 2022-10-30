@@ -975,7 +975,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gh-pages@npm:^4.0.0":
+"gh-pages@npm:4.0.0":
   version: 4.0.0
   resolution: "gh-pages@npm:4.0.0"
   dependencies:
@@ -1428,7 +1428,7 @@ __metadata:
     "@typescript-eslint/parser": 5.35.1
     cpy-cli: 4.2.0
     eslint: 8.23.0
-    gh-pages: ^4.0.0
+    gh-pages: 4.0.0
     typescript: 4.8.2
   languageName: unknown
   linkType: soft
