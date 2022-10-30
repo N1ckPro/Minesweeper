@@ -36,8 +36,30 @@ jobs:
           name: files
           path: build/src/*
 
-  deploy:
-    name: Deploy Minesweeper Game
+  deploy_pages:
+    name: Deploy Minesweeper Game to Github Pages
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: files
+          path: files
+
+      - name: Publish Github Pages
+        run: |
+        git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/USER_OR_ORG/REPO.git
+        npx gh-pages -d files -u "github-actions-bot <support+actions@github.com>"
+
+  deploy_itch:
+    name: Deploy Minesweeper Game to Itch.io
     needs: build
     runs-on: ubuntu-latest
     env:
