@@ -14,6 +14,7 @@ jobs:
       ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
     outputs:
       changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -47,7 +48,7 @@ jobs:
   deploy_pages:
     name: Deploy Minesweeper Game to Github Pages
     if: needs.check.outputs.changed == 'true'
-    needs: build
+    needs: check
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
@@ -70,7 +71,7 @@ jobs:
   deploy_itch:
     name: Deploy Minesweeper Game to Itch.io
     if: needs.check.outputs.changed == 'true'
-    needs: build
+    needs: check
     runs-on: ubuntu-latest
     env:
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
@@ -89,10 +90,6 @@ jobs:
         run: |
           zip -r files.zip files
       
-      - name: Get game version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
-      
       - name: Install Butler
         run: |
           curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
@@ -105,6 +102,6 @@ jobs:
 
       - name: Deploy
         env:
-          VERSION: ${{ steps.package-version.outputs.current-version }}
+          VERSION: ${{ needs.check.outputs.version }}
         run: |
           ./butler push files.zip n1ck-pro/minesweeper:main --userversion ${VERSION}
