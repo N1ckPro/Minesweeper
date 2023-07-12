@@ -1,18 +1,15 @@
 {
-    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended-type-checked", "plugin:@typescript-eslint/stylistic-type-checked"],
     "parser": "@typescript-eslint/parser",
     "plugins": ["@typescript-eslint"],
 	"parserOptions": {
-		"ecmaVersion": 2021
+		"ecmaVersion": 2021,
+        "project": "tsconfig.json"
 	},
 
     "rules": {
         "@typescript-eslint/array-type": "error",
-        "@typescript-eslint/class-literal-property-style": ["error", "getters"],
-        "@typescript-eslint/explicit-function-return-type": "error",
-        "@typescript-eslint/explicit-member-accessibility": ["error", { "overrides": { "constructors": "off" } }],
         "@typescript-eslint/member-delimiter-style": "error",
-        "@typescript-eslint/sort-type-union-intersection-members": "error",
 
         "no-compare-neg-zero": "error",
         "no-constructor-return": "error",
@@ -53,7 +50,6 @@
         "no-useless-escape": "error",
         "no-useless-return": "error",
         "no-var": "error",
-        "no-void": "error",
         "no-warning-comments": "warn",
         "operator-assignment": "error",
         "prefer-arrow-callback": "error",

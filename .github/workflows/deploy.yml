@@ -4,15 +4,14 @@ on:
     workflows: [Test]
     types: [completed]
     branches:
-      - 'stable'
+      - 'main'
 
 jobs:
-  build:
-    name: Compile TypeScript
+  deploy:
+    name: Deploy game on version change
     runs-on: ubuntu-latest
     if: |
       ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,12 +23,18 @@ jobs:
           cache: yarn
           cache-dependency-path: yarn.lock
 
+      - name: Check version change
+        id: Check
+        uses: EndBug/version-check@v2
+
       - name: Install dependencies
+        if: steps.deploy.outputs.changed == 'true'
         run: yarn --immutable
 
       - name: Compile TypeScript
+        if: steps.deploy.outputs.changed == 'true'
         run: yarn build
-        
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -38,6 +43,7 @@ jobs:
 
   deploy_pages:
     name: Deploy Minesweeper Game to Github Pages
+    if: steps.deploy.outputs.changed == 'true'
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -60,6 +66,7 @@ jobs:
 
   deploy_itch:
     name: Deploy Minesweeper Game to Itch.io
+    if: steps.deploy.outputs.changed == 'true'
     needs: build
     runs-on: ubuntu-latest
     env:
