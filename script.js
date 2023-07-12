@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -41,7 +42,6 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
-var _this = this;
 var ColorType;
 (function (ColorType) {
     ColorType[ColorType["Dark"] = 0] = "Dark";
@@ -93,11 +93,11 @@ var getRandomIndex = function (length, indexes) {
     else
         getRandomIndex(length, indexes);
 };
-var checkGameLoss = function (block) { return __awaiter(_this, void 0, void 0, function () {
-    var gameIdTemp, loopBlocks_1, indexes_2, indexes_1, indexes_1_1, index, block_1, e_1_1;
-    var e_1, _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+var checkGameLoss = function (block) { return __awaiter(void 0, void 0, void 0, function () {
+    var gameIdTemp, loopBlocks_1, indexes_2, _a, indexes_1, indexes_1_1, index, block_1, e_1_1;
+    var _b, e_1, _c, _d;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
             case 0:
                 if (!block.bomb) return [3 /*break*/, 14];
                 gameIdTemp = gameId;
@@ -107,15 +107,17 @@ var checkGameLoss = function (block) { return __awaiter(_this, void 0, void 0, f
                 loopBlocks_1.forEach(function () {
                     getRandomIndex(loopBlocks_1.length - 1, indexes_2);
                 });
-                _b.label = 1;
+                _e.label = 1;
             case 1:
-                _b.trys.push([1, 7, 8, 13]);
-                indexes_1 = __asyncValues(indexes_2);
-                _b.label = 2;
+                _e.trys.push([1, 7, 8, 13]);
+                _a = true, indexes_1 = __asyncValues(indexes_2);
+                _e.label = 2;
             case 2: return [4 /*yield*/, indexes_1.next()];
             case 3:
-                if (!(indexes_1_1 = _b.sent(), !indexes_1_1.done)) return [3 /*break*/, 6];
-                index = indexes_1_1.value;
+                if (!(indexes_1_1 = _e.sent(), _b = indexes_1_1.done, !_b)) return [3 /*break*/, 6];
+                _d = indexes_1_1.value;
+                _a = false;
+                index = _d;
                 if (gameId != gameIdTemp)
                     return [2 /*return*/];
                 block_1 = loopBlocks_1[index];
@@ -132,21 +134,23 @@ var checkGameLoss = function (block) { return __awaiter(_this, void 0, void 0, f
                 }
                 return [4 /*yield*/, new Promise(function (resolve) { return window.setTimeout(resolve, 200); })];
             case 4:
-                _b.sent();
-                _b.label = 5;
-            case 5: return [3 /*break*/, 2];
+                _e.sent();
+                _e.label = 5;
+            case 5:
+                _a = true;
+                return [3 /*break*/, 2];
             case 6: return [3 /*break*/, 13];
             case 7:
-                e_1_1 = _b.sent();
+                e_1_1 = _e.sent();
                 e_1 = { error: e_1_1 };
                 return [3 /*break*/, 13];
             case 8:
-                _b.trys.push([8, , 11, 12]);
-                if (!(indexes_1_1 && !indexes_1_1.done && (_a = indexes_1.return))) return [3 /*break*/, 10];
-                return [4 /*yield*/, _a.call(indexes_1)];
+                _e.trys.push([8, , 11, 12]);
+                if (!(!_a && !_b && (_c = indexes_1.return))) return [3 /*break*/, 10];
+                return [4 /*yield*/, _c.call(indexes_1)];
             case 9:
-                _b.sent();
-                _b.label = 10;
+                _e.sent();
+                _e.label = 10;
             case 10: return [3 /*break*/, 12];
             case 11:
                 if (e_1) throw e_1.error;
@@ -158,7 +162,7 @@ var checkGameLoss = function (block) { return __awaiter(_this, void 0, void 0, f
                 gameContext.fillStyle = 'red';
                 gameContext.font = '50px Arial';
                 gameContext.fillText('GAME OVER', 50, 200);
-                _b.label = 14;
+                _e.label = 14;
             case 14: return [2 /*return*/];
         }
     });
@@ -266,7 +270,7 @@ var handleLeftClick = function (event) {
     var block = blocks.find(function (block) { return block.x == blockPosition.x && block.y == blockPosition.y; });
     if (block.exposed || block.flag)
         return;
-    checkGameLoss(block);
+    void checkGameLoss(block);
     if (!gameRunning)
         return;
     updateMap(blockPosition);
