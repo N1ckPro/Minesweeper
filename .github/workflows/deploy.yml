@@ -7,11 +7,13 @@ on:
       - 'main'
 
 jobs:
-  deploy:
-    name: Deploy game on version change
+  check:
+    name: Check version change
     runs-on: ubuntu-latest
     if: |
       ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,18 +26,19 @@ jobs:
           cache-dependency-path: yarn.lock
 
       - name: Check version change
-        id: Check
+        id: check
         uses: EndBug/version-check@v2
 
       - name: Install dependencies
-        if: steps.deploy.outputs.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: yarn --immutable
 
       - name: Compile TypeScript
-        if: steps.deploy.outputs.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: yarn build
 
       - name: Upload Artifacts
+        if: steps.check.outputs.changed == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: files
@@ -43,7 +46,7 @@ jobs:
 
   deploy_pages:
     name: Deploy Minesweeper Game to Github Pages
-    if: steps.deploy.outputs.changed == 'true'
+    if: needs.check.outputs.changed == 'true'
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -66,7 +69,7 @@ jobs:
 
   deploy_itch:
     name: Deploy Minesweeper Game to Itch.io
-    if: steps.deploy.outputs.changed == 'true'
+    if: needs.check.outputs.changed == 'true'
     needs: build
     runs-on: ubuntu-latest
     env:
