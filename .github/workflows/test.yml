@@ -1,26 +1,28 @@
 name: Test
 on: [push, pull_request]
 jobs:
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Install Node v18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: yarn
-          cache-dependency-path: yarn.lock
+            - name: Install Node v18
+              uses: actions/setup-node@v4
+              env:
+                  SKIP_YARN_COREPACK_CHECK: 1
+              with:
+                  node-version: 18
+                  cache: yarn
+                  cache-dependency-path: yarn.lock
 
-      - name: Install dependencies
-        run: yarn --immutable
+            - name: Install dependencies
+              run: yarn --immutable
 
-      - name: Run Lint
-        run: yarn lint
+            - name: Run Lint
+              run: yarn lint
 
-      - name: Compile TypeScript
-        run: yarn build
+            - name: Compile TypeScript
+              run: yarn build

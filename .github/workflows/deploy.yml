@@ -1,105 +1,106 @@
 name: Deploy
 on:
-  push:
-    branches:
-      - 'main'
+    push:
+        branches:
+            - 'main'
 
 jobs:
-  check:
-    name: Check version change
-    runs-on: ubuntu-latest
-    if: |
-      ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
-    outputs:
-      changed: ${{ steps.check.outputs.changed }}
-      version: ${{ steps.check.outputs.version }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    check:
+        name: Check version change
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }} || ${{ github.repository_owner == 'N1ckPro' }}
+        outputs:
+            changed: ${{ steps.check.outputs.changed }}
+            version: ${{ steps.check.outputs.version }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Install Node v18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: yarn
-          cache-dependency-path: yarn.lock
+            - name: Install Node v18
+              uses: actions/setup-node@v4
+              env:
+                  SKIP_YARN_COREPACK_CHECK: 1
+              with:
+                  node-version: 18
+                  cache: yarn
+                  cache-dependency-path: yarn.lock
 
-      - name: Check version change
-        id: check
-        uses: EndBug/version-check@v2
+            - name: Check version change
+              id: check
+              uses: EndBug/version-check@v2
 
-      - name: Install dependencies
-        if: steps.check.outputs.changed == 'true'
-        run: yarn --immutable
+            - name: Install dependencies
+              if: steps.check.outputs.changed == 'true'
+              run: yarn --immutable
 
-      - name: Compile TypeScript
-        if: steps.check.outputs.changed == 'true'
-        run: yarn build
+            - name: Compile TypeScript
+              if: steps.check.outputs.changed == 'true'
+              run: yarn build
 
-      - name: Upload Artifacts
-        if: steps.check.outputs.changed == 'true'
-        uses: actions/upload-artifact@v3
-        with:
-          name: files
-          path: build/src/*
+            - name: Upload Artifacts
+              if: steps.check.outputs.changed == 'true'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: files
+                  path: build/src/*
 
-  deploy_pages:
-    name: Deploy Minesweeper Game to Github Pages
-    if: needs.check.outputs.changed == 'true'
-    needs: check
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: files
-          path: files
-
-      - name: Publish Github Pages
-        run: |
-          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          npx gh-pages -d files -u "github-actions-bot <support+actions@github.com>"
-
-  deploy_itch:
-    name: Deploy Minesweeper Game to Itch.io
-    if: needs.check.outputs.changed == 'true'
-    needs: check
-    runs-on: ubuntu-latest
-    env:
-      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: files
-          path: files
-        
-      - name: Pack files to ZIP
-        run: |
-          zip -r files.zip files
-      
-      - name: Install Butler
-        run: |
-          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-          unzip butler.zip
-          chmod +x butler
-      
-      - name: Login to Butler
-        run: |
-          ./butler login
-
-      - name: Deploy
+    deploy_pages:
+        name: Deploy Minesweeper Game to Github Pages
+        if: needs.check.outputs.changed == 'true'
+        needs: check
+        runs-on: ubuntu-latest
         env:
-          VERSION: ${{ needs.check.outputs.version }}
-        run: |
-          ./butler push files.zip n1ck-pro/minesweeper:main --userversion ${VERSION}
+            GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download Artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: files
+                  path: files
+
+            - name: Publish Github Pages
+              run: |
+                  git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+                  npx gh-pages -d files -u "github-actions-bot <support+actions@github.com>"
+
+    deploy_itch:
+        name: Deploy Minesweeper Game to Itch.io
+        if: needs.check.outputs.changed == 'true'
+        needs: check
+        runs-on: ubuntu-latest
+        env:
+            BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download Artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: files
+                  path: files
+
+            - name: Pack files to ZIP
+              run: |
+                  zip -r files.zip files
+
+            - name: Install Butler
+              run: |
+                  curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+                  unzip butler.zip
+                  chmod +x butler
+
+            - name: Login to Butler
+              run: |
+                  ./butler login
+
+            - name: Deploy
+              env:
+                  VERSION: ${{ needs.check.outputs.version }}
+              run: |
+                  ./butler push files.zip n1ck-pro/minesweeper:main --userversion ${VERSION}
