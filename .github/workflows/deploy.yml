@@ -25,6 +25,9 @@ jobs:
                   cache: yarn
                   cache-dependency-path: yarn.lock
 
+            - name: Enable corepack
+              run: corepack enable
+
             - name: Check version change
               id: check
               uses: EndBug/version-check@v2

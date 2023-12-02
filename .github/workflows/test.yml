@@ -18,6 +18,9 @@ jobs:
                   cache: yarn
                   cache-dependency-path: yarn.lock
 
+            - name: Enable corepack
+              run: corepack enable
+
             - name: Install dependencies
               run: yarn --immutable
 
