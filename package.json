@@ -1,7 +1,7 @@
 {
   "name": "minesweeper",
   "version": "0.5.2",
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.2.2",
   "author": {
     "name": "n1ck_pro",
     "url": "https://github.com/N1ckPro"
